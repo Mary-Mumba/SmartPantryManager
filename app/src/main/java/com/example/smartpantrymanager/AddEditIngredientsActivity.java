@@ -64,11 +64,11 @@ public class AddEditIngredientsActivity extends AppCompatActivity {
 
 //checks if the ingredient was saved successfully
             if (result != -1) {
-                Toast.makeText(this, "The ingredient has been saved successfully", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "The ingredient has been saved successfully", Toast.LENGTH_LONG).show();
 
                 finish(); //closes the activity after saving
             } else {
-                Toast.makeText(this, "Sorry! Failed to save the ingredient", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Sorry! Failed to save the ingredient", Toast.LENGTH_LONG).show();
             }
         });
     }
