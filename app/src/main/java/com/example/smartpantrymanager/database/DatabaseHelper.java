@@ -115,19 +115,79 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return ingredients;
     }
 
-//This updates an ingredient in the pantry that is already existing
+//Gets one ingredient from the pantry using its Id
+    public Ingredient getIngredientById(int ingredientId) {
+
+//this gets a readable database
+        SQLiteDatabase db = this.getReadableDatabase();
+
+//this finds the ingredient with the matching Id
+        Cursor cursor = db.rawQuery(
+                "SELECT * FROM pantry WHERE id = ?",
+                new String[]{String.valueOf(ingredientId)}
+        );
+
+//This will store the ingredient found
+        Ingredient ingredient = null;
+
+//checks if an ingredient was found
+        if (cursor.moveToFirst()) {
+
+// Gets the ingredient id
+            int id = cursor.getInt(
+                    cursor.getColumnIndexOrThrow("id")
+            );
+
+// Gets the ingredient name
+            String name = cursor.getString(
+                    cursor.getColumnIndexOrThrow("ingredient_name")
+            );
+
+//gets the quantity
+            double quantity = cursor.getDouble(
+                    cursor.getColumnIndexOrThrow("quantity")
+            );
+
+//gets the unit
+            String unit = cursor.getString(
+                    cursor.getColumnIndexOrThrow("unit")
+            );
+
+//gets the expiry date
+            String expiryDate = cursor.getString(
+                    cursor.getColumnIndexOrThrow("expiry_date")
+            );
+
+// creates an ingredient object using the information that has been found
+            ingredient = new Ingredient(
+                    id,
+                    name,
+                    quantity,
+                    unit,
+                    expiryDate
+            );
+        }
+
+        cursor.close();// Closes the cursor
+
+        db.close();// Closes the database
+
+        return ingredient;// Returns the ingredient
+    }
+
+//this updates an ingredient in pantry that already exists
     public int updateIngredient(Ingredient ingredient) {
 
         SQLiteDatabase db = this.getWritableDatabase();
 
-//stores updated ingredient values
+//this stores updated ingredient values
         ContentValues values = new ContentValues();
         values.put("ingredient_name", ingredient.getIngredientName());
         values.put("quantity", ingredient.getQuantity());
         values.put("unit", ingredient.getUnit());
         values.put("expiry_date", ingredient.getExpiryDate());
 
-//This updates the ingredient using its id
+//this updates the ingredient using its id
         int result = db.update(
                 "pantry",
                 values,

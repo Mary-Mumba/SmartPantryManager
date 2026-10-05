@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
                 databaseHelper.getAllIngredients();
 
 // Creates the pantry adapter
-        pantryAdapter = new PantryIngredientsAdapter(ingredientList);
+        pantryAdapter = new PantryIngredientsAdapter(ingredientList, this);
 
 // Connects the adapter to the RecyclerView
         recyclerPantry.setAdapter(pantryAdapter);

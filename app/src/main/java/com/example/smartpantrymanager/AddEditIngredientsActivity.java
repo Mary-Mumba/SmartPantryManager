@@ -16,6 +16,12 @@ public class AddEditIngredientsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+// Gets the ingredient id sent from the edit button
+        int ingredientId = getIntent().getIntExtra("ingredient_id", -1);
+
+// Checks if user an editing an existing ingredient
+        boolean isEditing = ingredientId != -1;
+
         EdgeToEdge.enable(this);//allows ofr edge to edge display
 
 //This connects this activity to it's XML layout
@@ -27,11 +33,42 @@ public class AddEditIngredientsActivity extends AppCompatActivity {
         EditText editUnit = findViewById(R.id.editUnit);
         EditText editExpiryDate = findViewById(R.id.editExpiryDate);
 
-//Make a connection to the save button
+//makes a connection to the save button
         Button btnSaveIngredient = findViewById(R.id.btnSaveIngredient);
 
 //This Creates the database helper
         DatabaseHelper databaseHelper = new DatabaseHelper(this);
+
+//gets the existing ingredient when editing
+        if (isEditing) {
+
+            Ingredient existingIngredient =
+                    databaseHelper.getIngredientById(ingredientId);
+
+//This checks if the ingredient was found
+            if (existingIngredient != null) {
+
+//Shows the existing ingredient name
+                editIngredientName.setText(
+                        existingIngredient.getIngredientName()
+                );
+
+//Shows the existing quantity
+                editQuantity.setText(
+                        String.valueOf(existingIngredient.getQuantity())
+                );
+
+//shows the existing unit
+                editUnit.setText(
+                        existingIngredient.getUnit()
+                );
+
+//shows existing expiry date
+                editExpiryDate.setText(
+                        existingIngredient.getExpiryDate()
+                );
+            }
+        }
 
 //Saves ingredients when the button is clicked
         btnSaveIngredient.setOnClickListener(v -> {
@@ -42,33 +79,85 @@ public class AddEditIngredientsActivity extends AppCompatActivity {
             String unit = editUnit.getText().toString().trim();
             String expiryDate = editExpiryDate.getText().toString().trim();
 
-//Checks the required fields are not empty
+//this checks the required fields are not empty
             if (name.isEmpty() || quantityText.isEmpty() || unit.isEmpty()) {
                 Toast.makeText(this, "Please ensure that all required fields are filled", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-//Converts the quantity text to a number
+//converts the quantity text to a number
             double quantity = Double.parseDouble(quantityText);
 
-            // Create an Ingredient object
-            Ingredient ingredient = new Ingredient(
-                    name,
-                    quantity,
-                    unit,
-                    expiryDate
-            );
+//Create an Ingredient object
+            Ingredient ingredient;
 
-//This adds the ingredients to the database
-            long result = databaseHelper.addIngredient(ingredient);
+            if (isEditing) {
+
+//Creates the ingredient with the existing id
+                ingredient = new Ingredient(
+                        ingredientId,
+                        name,
+                        quantity,
+                        unit,
+                        expiryDate
+                );
+
+            } else {
+
+                ingredient = new Ingredient(//creates a new ingredient
+                        name,
+                        quantity,
+                        unit,
+                        expiryDate
+                );
+            }
+
+//this saves the ingredient to the database
+            long result;
+
+            if (isEditing) {
+
+//updates the existing ingredient
+                result = databaseHelper.updateIngredient(ingredient);
+
+            } else {
+
+// adds a new ingredient
+                result = databaseHelper.addIngredient(ingredient);
+            }
 
 //checks if the ingredient was saved successfully
             if (result != -1) {
-                Toast.makeText(this, "The ingredient has been saved successfully", Toast.LENGTH_LONG).show();
 
-                finish(); //closes the activity after saving
+                if (isEditing) {
+
+                    // Shows a message when an ingredient is updated
+                    Toast.makeText(
+                            this,
+                            "The ingredient has been updated successfully",
+                            Toast.LENGTH_LONG
+                    ).show();
+
+                } else {
+
+// Shows the message when a new ingredient is added
+                    Toast.makeText(
+                            this,
+                            "The ingredient has been saved successfully",
+                            Toast.LENGTH_LONG
+                    ).show();
+                }
+
+                finish(); // closes the activity after saving
+
             } else {
-                Toast.makeText(this, "Sorry! Failed to save the ingredient", Toast.LENGTH_LONG).show();
+
+//shows a message if saving or updating has failed
+                Toast.makeText(
+                        this,
+                        "Sorry! Failed to save the ingredient",
+                        Toast.LENGTH_LONG
+                ).show();
             }
         });
     }
